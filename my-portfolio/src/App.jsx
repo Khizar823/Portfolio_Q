@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from "react";
+import { motion, useAnimation } from "framer-motion";
+import { Canvas, useFrame } from "@react-three/fiber";
+import { OrbitControls, Stars } from "@react-three/drei";
 
-export default function App() {
+const App = () => {
   const [darkMode, setDarkMode] = useState(true);
   const [activeSection, setActiveSection] = useState("about");
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
@@ -13,6 +16,9 @@ export default function App() {
     window.addEventListener("mousemove", handleMouseMove);
     return () => window.removeEventListener("mousemove", handleMouseMove);
   }, []);
+
+  // Animation controls
+  const controls = useAnimation();
 
   const caseStudies = [
     {
@@ -57,10 +63,43 @@ export default function App() {
     github: "github.com/Khizar823"
   };
 
+  // 3D Background Component
+  const ThreeBackground = () => {
+    const meshRef = React.useRef();
+    
+    useFrame((state) => {
+      if (meshRef.current) {
+        meshRef.current.rotation.y = state.clock.elapsedTime * 0.1;
+        meshRef.current.rotation.x = state.clock.elapsedTime * 0.05;
+      }
+    });
+
+    return (
+      <mesh ref={meshRef} position={[0, 0, -5]}>
+        <sphereGeometry args={[3, 32, 32]} />
+        <meshStandardMaterial 
+          color={darkMode ? "#1a1a2e" : "#f5f7fa"} 
+          emissive={darkMode ? "#0f3460" : "#d5e1f0"} 
+          emissiveIntensity={0.5}
+          roughness={0.5}
+        />
+      </mesh>
+    );
+  };
+
   return (
     <div className={`min-h-screen relative transition-colors duration-500 ${darkMode ? 'bg-gray-900 text-white' : 'bg-gray-50 text-gray-900'}`}>
-      {/* Animated Background */}
+      {/* Animated 3D Background */}
       <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none">
+        <Canvas camera={{ position: [0, 0, 5], fov: 70 }}>
+          <ambientLight intensity={Math.PI} />
+          <pointLight position={[10, 10, 10]} intensity={1} />
+          <Stars radius={100} count={2000} factor={4} fade speed={1} />
+          <ThreeBackground />
+          <OrbitControls enableZoom={false} enablePan={false} />
+        </Canvas>
+        
+        {/* Gradient Overlay */}
         <div 
           className="absolute inset-0 opacity-70"
           style={{
@@ -79,9 +118,11 @@ export default function App() {
       </div>
       
       {/* Theme Toggle */}
-      <button 
+      <motion.button 
         onClick={() => setDarkMode(!darkMode)}
         className="fixed top-4 right-4 z-50 p-2 rounded-full bg-white/10 backdrop-blur-md border border-white/20 hover:bg-white/20 transition-all duration-300 md:p-3"
+        whileHover={{ scale: 1.1 }}
+        whileTap={{ scale: 0.95 }}
       >
         {darkMode ? (
           <svg className="w-4 h-4 text-yellow-300 md:w-5 md:h-5" fill="currentColor" viewBox="0 0 20 20">
@@ -92,12 +133,14 @@ export default function App() {
             <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z" />
           </svg>
         )}
-      </button>
+      </motion.button>
 
       {/* Mobile Menu Toggle */}
-      <button
+      <motion.button
         onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
         className="fixed top-4 left-4 z-50 p-2 rounded-full bg-white/10 backdrop-blur-md border border-white/20 hover:bg-white/20 transition-all duration-300 md:hidden"
+        whileHover={{ scale: 1.1 }}
+        whileTap={{ scale: 0.95 }}
       >
         <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           {isMobileMenuOpen ? (
@@ -106,7 +149,7 @@ export default function App() {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
           )}
         </svg>
-      </button>
+      </motion.button>
 
       {/* Navigation */}
       <nav className={`
@@ -117,7 +160,7 @@ export default function App() {
       `}>
         <div className="flex flex-col md:flex-row space-y-2 md:space-y-0 md:space-x-2 max-w-4xl mx-auto">
           {['about', 'skills', 'case-studies', 'contact'].map((section) => (
-            <button
+            <motion.button
               key={section}
               onClick={() => {
                 setActiveSection(section);
@@ -133,9 +176,11 @@ export default function App() {
                 }
                 w-full md:w-auto
               `}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
             >
               {section === 'case-studies' ? 'Case Studies' : section.charAt(0).toUpperCase() + section.slice(1)}
-            </button>
+            </motion.button>
           ))}
         </div>
       </nav>
@@ -143,10 +188,16 @@ export default function App() {
       {/* Main Content */}
       <main className="pt-24 md:pt-28 pb-16 px-4 max-w-6xl mx-auto relative z-10">
         {activeSection === "about" && (
-          <div className={`
-            backdrop-blur-xl rounded-2xl p-6 md:p-8 shadow-2xl
-            ${darkMode ? 'bg-white/5 border border-white/10' : 'bg-white/80 border border-gray-200'}
-          `}>
+          <motion.div
+            initial={{ opacity: 0, y: 50 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className={`
+              backdrop-blur-xl rounded-2xl p-6 md:p-8 shadow-2xl
+              ${darkMode ? 'bg-white/5 border border-white/10' : 'bg-white/80 border border-gray-200'}
+              hover:shadow-neon transition-all duration-500
+            `}
+          >
             <div className="mb-8 text-center">
               <h1 className="text-4xl md:text-6xl font-bold bg-gradient-to-r from-purple-400 via-pink-400 to-blue-400 bg-clip-text text-transparent">
                 Khizer Niaz
@@ -168,22 +219,32 @@ export default function App() {
                 Open to global remote opportunities in AI, SaaS, and digital transformation.
               </p>
             </div>
-          </div>
+          </motion.div>
         )}
 
         {activeSection === "skills" && (
-          <div className={`
-            backdrop-blur-xl rounded-2xl p-6 md:p-8 shadow-2xl
-            ${darkMode ? 'bg-white/5 border border-white/10' : 'bg-white/80 border border-gray-200'}
-          `}>
+          <motion.div
+            initial={{ opacity: 0, y: 50 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.1 }}
+            className={`
+              backdrop-blur-xl rounded-2xl p-6 md:p-8 shadow-2xl
+              ${darkMode ? 'bg-white/5 border border-white/10' : 'bg-white/80 border border-gray-200'}
+            `}
+          >
             <h2 className="text-3xl md:text-4xl font-bold mb-8 bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
               Technical Skills & Expertise
             </h2>
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-12">
               {skills.map((skill, index) => (
-                <div key={index} className={`p-4 rounded-xl ${darkMode ? 'bg-white/5 border border-white/10' : 'bg-gray-100 border border-gray-200'}`}>
+                <motion.div
+                  key={index}
+                  className={`p-4 rounded-xl ${darkMode ? 'bg-white/5 border border-white/10' : 'bg-gray-100 border border-gray-200'}`}
+                  whileHover={{ scale: 1.05, rotate: 2 }}
+                  transition={{ type: "spring", stiffness: 300 }}
+                >
                   <span className="font-medium">{skill}</span>
-                </div>
+                </motion.div>
               ))}
             </div>
             <div className={`pt-8 border-t ${darkMode ? 'border-white/10' : 'border-gray-200'}`}>
@@ -204,20 +265,30 @@ export default function App() {
                 ))}
               </ul>
             </div>
-          </div>
+          </motion.div>
         )}
 
         {activeSection === "case-studies" && (
-          <div className={`
-            backdrop-blur-xl rounded-2xl p-6 md:p-8 shadow-2xl
-            ${darkMode ? 'bg-white/5 border border-white/10' : 'bg-white/80 border border-gray-200'}
-          `}>
+          <motion.div
+            initial={{ opacity: 0, y: 50 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+            className={`
+              backdrop-blur-xl rounded-2xl p-6 md:p-8 shadow-2xl
+              ${darkMode ? 'bg-white/5 border border-white/10' : 'bg-white/80 border border-gray-200'}
+            `}
+          >
             <h2 className="text-3xl md:text-4xl font-bold mb-8 bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
               Case Studies
             </h2>
             <div className="space-y-6">
               {caseStudies.map((study, index) => (
-                <div key={index} className={`p-6 rounded-xl ${darkMode ? 'bg-white/5 border border-white/10' : 'bg-gray-100 border border-gray-200'}`}>
+                <motion.div
+                  key={index}
+                  className={`p-6 rounded-xl ${darkMode ? 'bg-white/5 border border-white/10' : 'bg-gray-100 border border-gray-200'}`}
+                  whileHover={{ scale: 1.02, boxShadow: "0 0 30px rgba(147, 51, 234, 0.3)" }}
+                  transition={{ type: "spring", stiffness: 300 }}
+                >
                   <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-4">
                     <h3 className="text-xl md:text-2xl font-bold text-purple-500">{study.title}</h3>
                     <span className="text-sm text-gray-500 dark:text-gray-400 mt-2 md:mt-0">{study.period}</span>
@@ -225,17 +296,22 @@ export default function App() {
                   <div className="mb-3"><span className="font-medium text-blue-500">Role: </span>{study.role}</div>
                   <div className="mb-3"><span className="font-medium text-blue-500">Technologies: </span>{study.tech}</div>
                   <div><span className="font-medium text-blue-500">Result: </span>{study.result}</div>
-                </div>
+                </motion.div>
               ))}
             </div>
-          </div>
+          </motion.div>
         )}
 
         {activeSection === "contact" && (
-          <div className={`
-            backdrop-blur-xl rounded-2xl p-6 md:p-8 shadow-2xl
-            ${darkMode ? 'bg-white/5 border border-white/10' : 'bg-white/80 border border-gray-200'}
-          `}>
+          <motion.div
+            initial={{ opacity: 0, y: 50 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.3 }}
+            className={`
+              backdrop-blur-xl rounded-2xl p-6 md:p-8 shadow-2xl
+              ${darkMode ? 'bg-white/5 border border-white/10' : 'bg-white/80 border border-gray-200'}
+            `}
+          >
             <h2 className="text-3xl md:text-4xl font-bold mb-8 bg-gradient-to-r from-pink-400 to-blue-400 bg-clip-text text-transparent">
               Get In Touch
             </h2>
@@ -245,13 +321,18 @@ export default function App() {
                 { title: "LinkedIn", value: contactInfo.linkedin, color: "blue" },
                 { title: "GitHub", value: contactInfo.github, color: "pink" }
               ].map((item, i) => (
-                <div key={i} className={`p-6 rounded-xl ${darkMode ? 'bg-white/5 border border-white/10' : 'bg-gray-100 border border-gray-200'}`}>
+                <motion.div
+                  key={i}
+                  className={`p-6 rounded-xl ${darkMode ? 'bg-white/5 border border-white/10' : 'bg-gray-100 border border-gray-200'}`}
+                  whileHover={{ scale: 1.05, boxShadow: `0 0 30px rgba(${item.color === 'purple' ? '120, 75, 255' : item.color === 'blue' ? '0, 123, 255' : '255, 105, 180'}, 0.3)` }}
+                  transition={{ type: "spring", stiffness: 300 }}
+                >
                   <h3 className={`text-xl font-semibold mb-4 text-${item.color}-500`}>{item.title}</h3>
                   <p className="text-gray-700 dark:text-gray-300 break-all mb-4">{item.value}</p>
                   <button className={`w-full px-4 py-2 bg-gradient-to-r from-${item.color}-500 to-${item.color === 'purple' ? 'pink' : item.color === 'blue' ? 'purple' : 'blue'}-500 text-white rounded-lg hover:shadow-lg transition-all duration-300`}>
                     {item.title === "Email" ? "Copy Email" : `View ${item.title}`}
                   </button>
-                </div>
+                </motion.div>
               ))}
             </div>
             <div className={`mt-12 pt-8 border-t ${darkMode ? 'border-white/10' : 'border-gray-200'}`}>
@@ -262,13 +343,21 @@ export default function App() {
                 Let's build something amazing together.
               </p>
             </div>
-          </div>
+          </motion.div>
         )}
       </main>
 
       <footer className={`py-6 text-center text-gray-500 dark:text-gray-400 border-t ${darkMode ? 'border-white/10' : 'border-gray-200'} backdrop-blur-md`}>
         <p>© 2024 Khizer Niaz. All rights reserved.</p>
       </footer>
+
+      <style jsx>{`
+        .hover\\:shadow-neon:hover {
+          box-shadow: 0 0 30px rgba(147, 51, 234, 0.3), 0 0 60px rgba(147, 51, 234, 0.2);
+        }
+      `}</style>
     </div>
   );
-}
+};
+
+export default App;
