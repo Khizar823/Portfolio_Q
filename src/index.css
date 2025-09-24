@@ -2,12 +2,8 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Custom animations */
-@keyframes pulse-slow {
-  0%, 100% { opacity: 0.2; }
-  50% { opacity: 0.4; }
-}
-
-.hover\:shadow-neon:hover {
-  box-shadow: 0 0 30px rgba(147, 51, 234, 0.3), 0 0 60px rgba(147, 51, 234, 0.2);
+@layer utilities {
+  .hover\:shadow-neon:hover {
+    box-shadow: 0 0 30px rgba(147, 51, 234, 0.3), 0 0 60px rgba(147, 51, 234, 0.2);
+  }
 }
