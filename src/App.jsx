@@ -1,7 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { motion, useAnimation } from "framer-motion";
-import { Canvas, useFrame } from "@react-three/fiber";
-import { OrbitControls, Stars } from "@react-three/drei";
+import { motion } from "framer-motion";
 
 const App = () => {
   const [darkMode, setDarkMode] = useState(true);
@@ -17,8 +15,20 @@ const App = () => {
     return () => window.removeEventListener("mousemove", handleMouseMove);
   }, []);
 
-  // Animation controls
-  const controls = useAnimation();
+  // Predefined color palette
+  const colors = {
+    bg: darkMode ? '#0f0c29' : '#f8fafc',
+    cardBg: darkMode ? 'rgba(255, 255, 255, 0.05)' : 'rgba(255, 255, 255, 0.8)',
+    cardBorder: darkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)',
+    text: darkMode ? '#ffffff' : '#1e293b',
+    textSecondary: darkMode ? '#94a3b8' : '#64748b',
+    gradient1: 'linear-gradient(135deg, #8b5cf6, #ec4899, #3b82f6)',
+    gradient2: 'linear-gradient(135deg, #3b82f6, #8b5cf6)',
+    gradient3: 'linear-gradient(135deg, #ec4899, #3b82f6)',
+    purple: '#8b5cf6',
+    pink: '#ec4899',
+    blue: '#3b82f6'
+  };
 
   const caseStudies = [
     {
@@ -63,193 +73,165 @@ const App = () => {
     github: "github.com/Khizar823"
   };
 
-  // 3D Background Component
-  const ThreeBackground = () => {
-    const meshRef = React.useRef();
-    
-    useFrame((state) => {
-      if (meshRef.current) {
-        meshRef.current.rotation.y = state.clock.elapsedTime * 0.1;
-        meshRef.current.rotation.x = state.clock.elapsedTime * 0.05;
-      }
-    });
-
-    return (
-      <mesh ref={meshRef} position={[0, 0, -5]}>
-        <sphereGeometry args={[3, 32, 32]} />
-        <meshStandardMaterial 
-          color={darkMode ? "#1a1a2e" : "#f5f7fa"} 
-          emissive={darkMode ? "#0f3460" : "#d5e1f0"} 
-          emissiveIntensity={0.5}
-          roughness={0.5}
-        />
-      </mesh>
-    );
-  };
+  // Card component with inline styles
+  const GlassCard = ({ children, style = {} }) => (
+    <motion.div
+      className="rounded-2xl p-6 md:p-8 backdrop-blur-xl"
+      style={{
+        background: colors.cardBg,
+        border: `1px solid ${colors.cardBorder}`,
+        boxShadow: '0 10px 30px rgba(0, 0, 0, 0.1)',
+        ...style
+      }}
+      whileHover={{ 
+        scale: 1.02,
+        boxShadow: '0 20px 40px rgba(139, 92, 246, 0.3)'
+      }}
+      transition={{ type: "spring", stiffness: 300 }}
+    >
+      {children}
+    </motion.div>
+  );
 
   return (
-    <div className={`min-h-screen relative transition-colors duration-500 ${darkMode ? 'bg-gray-900 text-white' : 'bg-gray-50 text-gray-900'}`}>
-      {/* Animated 3D Background */}
-      <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none">
-        <Canvas camera={{ position: [0, 0, 5], fov: 70 }}>
-          <ambientLight intensity={Math.PI} />
-          <pointLight position={[10, 10, 10]} intensity={1} />
-          <Stars radius={100} count={2000} factor={4} fade speed={1} />
-          <ThreeBackground />
-          <OrbitControls enableZoom={false} enablePan={false} />
-        </Canvas>
-        
-        {/* Gradient Overlay */}
-        <div 
-          className="absolute inset-0 opacity-70"
-          style={{
-            background: darkMode 
-              ? `
-                radial-gradient(circle at ${mousePosition.x}px ${mousePosition.y}px, rgba(120, 75, 255, 0.3) 0%, transparent 50%),
-                radial-gradient(circle at ${window.innerWidth - mousePosition.x}px ${mousePosition.y}px, rgba(255, 105, 180, 0.3) 0%, transparent 50%),
-                linear-gradient(135deg, #0f0c29, #302b63, #24243e)
-              `
-              : `
-                radial-gradient(circle at ${mousePosition.x}px ${mousePosition.y}px, rgba(120, 75, 255, 0.1) 0%, transparent 50%),
-                linear-gradient(135deg, #f5f7fa, #e4edf9, #d5e1f0)
-              `
-          }}
-        />
-      </div>
+    <div style={{
+      background: colors.bg,
+      color: colors.text,
+      minHeight: '100vh',
+      transition: 'background 0.5s ease',
+      position: 'relative',
+      overflow: 'hidden'
+    }}>
+      {/* Animated Background */}
+      <div style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        width: '100%',
+        height: '100%',
+        background: `
+          radial-gradient(circle at ${mousePosition.x}px ${mousePosition.y}px, rgba(139, 92, 246, 0.2) 0%, transparent 50%),
+          radial-gradient(circle at ${window.innerWidth - mousePosition.x}px ${mousePosition.y}px, rgba(236, 72, 153, 0.2) 0%, transparent 50%),
+          ${darkMode ? 'linear-gradient(135deg, #0f0c29, #302b63)' : 'linear-gradient(135deg, #f8fafc, #e2e8f0)'}
+        `,
+        zIndex: -1
+      }} />
       
       {/* Theme Toggle */}
-      <motion.button 
+      <button 
         onClick={() => setDarkMode(!darkMode)}
-        className="fixed top-4 right-4 z-50 p-2 rounded-full bg-white/10 backdrop-blur-md border border-white/20 hover:bg-white/20 transition-all duration-300 md:p-3"
-        whileHover={{ scale: 1.1 }}
-        whileTap={{ scale: 0.95 }}
+        style={{
+          position: 'fixed',
+          top: '1rem',
+          right: '1rem',
+          padding: '0.5rem',
+          borderRadius: '9999px',
+          background: 'rgba(255, 255, 255, 0.1)',
+          border: '1px solid rgba(255, 255, 255, 0.2)',
+          backdropFilter: 'blur(10px)',
+          cursor: 'pointer',
+          zIndex: 50
+        }}
       >
-        {darkMode ? (
-          <svg className="w-4 h-4 text-yellow-300 md:w-5 md:h-5" fill="currentColor" viewBox="0 0 20 20">
-            <path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" />
-          </svg>
-        ) : (
-          <svg className="w-4 h-4 text-gray-700 md:w-5 md:h-5" fill="currentColor" viewBox="0 0 20 20">
-            <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z" />
-          </svg>
-        )}
-      </motion.button>
-
-      {/* Mobile Menu Toggle */}
-      <motion.button
-        onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-        className="fixed top-4 left-4 z-50 p-2 rounded-full bg-white/10 backdrop-blur-md border border-white/20 hover:bg-white/20 transition-all duration-300 md:hidden"
-        whileHover={{ scale: 1.1 }}
-        whileTap={{ scale: 0.95 }}
-      >
-        <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          {isMobileMenuOpen ? (
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-          ) : (
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-          )}
-        </svg>
-      </motion.button>
+        {darkMode ? '☀️' : '🌙'}
+      </button>
 
       {/* Navigation */}
-      <nav className={`
-        fixed top-0 left-0 right-0 z-40 p-4 backdrop-blur-md border-b
-        ${darkMode ? 'bg-white/5 border-white/10' : 'bg-white/80 border-gray-200'}
-        ${isMobileMenuOpen ? 'block' : 'hidden md:flex'}
-        md:relative md:bg-transparent md:border-0
-      `}>
-        <div className="flex flex-col md:flex-row space-y-2 md:space-y-0 md:space-x-2 max-w-4xl mx-auto">
+      <nav style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        padding: '1rem',
+        backdropFilter: 'blur(10px)',
+        background: darkMode ? 'rgba(255, 255, 255, 0.05)' : 'rgba(255, 255, 255, 0.8)',
+        borderBottom: `1px solid ${colors.cardBorder}`,
+        zIndex: 40
+      }}>
+        <div style={{ display: 'flex', justifyContent: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
           {['about', 'skills', 'case-studies', 'contact'].map((section) => (
-            <motion.button
+            <button
               key={section}
-              onClick={() => {
-                setActiveSection(section);
-                setIsMobileMenuOpen(false);
+              onClick={() => setActiveSection(section)}
+              style={{
+                padding: '0.5rem 1rem',
+                borderRadius: '9999px',
+                background: activeSection === section ? colors.gradient1 : 'transparent',
+                color: activeSection === section ? 'white' : colors.textSecondary,
+                border: activeSection === section ? 'none' : `1px solid ${colors.cardBorder}`,
+                fontWeight: '500',
+                cursor: 'pointer'
               }}
-              className={`
-                px-4 py-2 rounded-full font-medium transition-all duration-300
-                ${activeSection === section 
-                  ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg' 
-                  : darkMode 
-                    ? 'bg-white/10 text-gray-300 hover:bg-white/20' 
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                }
-                w-full md:w-auto
-              `}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
             >
               {section === 'case-studies' ? 'Case Studies' : section.charAt(0).toUpperCase() + section.slice(1)}
-            </motion.button>
+            </button>
           ))}
         </div>
       </nav>
 
       {/* Main Content */}
-      <main className="pt-24 md:pt-28 pb-16 px-4 max-w-6xl mx-auto relative z-10">
+      <main style={{ paddingTop: '6rem', paddingBottom: '4rem', padding: '0 1rem', maxWidth: '1200px', margin: '0 auto', position: 'relative', zIndex: 10 }}>
         {activeSection === "about" && (
-          <motion.div
-            initial={{ opacity: 0, y: 50 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            className={`
-              backdrop-blur-xl rounded-2xl p-6 md:p-8 shadow-2xl
-              ${darkMode ? 'bg-white/5 border border-white/10' : 'bg-white/80 border border-gray-200'}
-              hover:shadow-neon transition-all duration-500
-            `}
-          >
-            <div className="mb-8 text-center">
-              <h1 className="text-4xl md:text-6xl font-bold bg-gradient-to-r from-purple-400 via-pink-400 to-blue-400 bg-clip-text text-transparent">
+          <GlassCard>
+            <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
+              <h1 style={{
+                fontSize: '2.5rem',
+                background: colors.gradient1,
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                fontWeight: 'bold',
+                marginBottom: '1rem'
+              }}>
                 Khizer Niaz
               </h1>
-              <p className="text-lg md:text-2xl mt-4 font-light">
+              <p style={{ fontSize: '1.25rem', opacity: 0.9 }}>
                 Senior Software Developer | AI & SaaS Engineer | Digital Growth & SEO Specialist
               </p>
-              <p className="text-gray-500 mt-2 md:mt-4">
+              <p style={{ marginTop: '0.5rem', opacity: 0.7 }}>
                 Bridging Technology & Marketing for Scalable Impact
               </p>
             </div>
-            <div className={`pt-8 border-t ${darkMode ? 'border-white/10' : 'border-gray-200'}`}>
-              <p className="text-base md:text-lg leading-relaxed max-w-4xl mx-auto">
+            <div style={{ borderTop: `1px solid ${colors.cardBorder}`, paddingTop: '2rem' }}>
+              <p style={{ marginBottom: '1rem', lineHeight: 1.6 }}>
                 I'm Khizer Niaz, a Senior Software Developer & Digital Marketing Specialist with expertise in Python, FastAPI, Flask, React.js, Next.js, and AI/ML integrations. 
                 I design scalable backends, intelligent APIs, and modern frontends, while also leading digital marketing, SEO, and growth strategies.
               </p>
-              <p className="text-base md:text-lg leading-relaxed max-w-4xl mx-auto mt-6">
+              <p style={{ lineHeight: 1.6 }}>
                 Passionate about AI-driven solutions, SaaS innovation, and storytelling, I help businesses transform complex ideas into clean, functional, and impactful solutions. 
                 Open to global remote opportunities in AI, SaaS, and digital transformation.
               </p>
             </div>
-          </motion.div>
+          </GlassCard>
         )}
 
         {activeSection === "skills" && (
-          <motion.div
-            initial={{ opacity: 0, y: 50 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.1 }}
-            className={`
-              backdrop-blur-xl rounded-2xl p-6 md:p-8 shadow-2xl
-              ${darkMode ? 'bg-white/5 border border-white/10' : 'bg-white/80 border border-gray-200'}
-            `}
-          >
-            <h2 className="text-3xl md:text-4xl font-bold mb-8 bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+          <GlassCard>
+            <h2 style={{
+              fontSize: '2rem',
+              background: colors.gradient1,
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              fontWeight: 'bold',
+              marginBottom: '2rem'
+            }}>
               Technical Skills & Expertise
             </h2>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-12">
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(120px, 1fr))', gap: '1rem', marginBottom: '3rem' }}>
               {skills.map((skill, index) => (
-                <motion.div
-                  key={index}
-                  className={`p-4 rounded-xl ${darkMode ? 'bg-white/5 border border-white/10' : 'bg-gray-100 border border-gray-200'}`}
-                  whileHover={{ scale: 1.05, rotate: 2 }}
-                  transition={{ type: "spring", stiffness: 300 }}
-                >
-                  <span className="font-medium">{skill}</span>
-                </motion.div>
+                <div key={index} style={{
+                  padding: '1rem',
+                  borderRadius: '12px',
+                  background: colors.cardBg,
+                  border: `1px solid ${colors.cardBorder}`,
+                  textAlign: 'center'
+                }}>
+                  {skill}
+                </div>
               ))}
             </div>
-            <div className={`pt-8 border-t ${darkMode ? 'border-white/10' : 'border-gray-200'}`}>
-              <h3 className="text-2xl font-semibold mb-6 text-purple-500">High-Demand Services</h3>
-              <ul className="space-y-3 text-gray-700 dark:text-gray-300">
+            <div style={{ borderTop: `1px solid ${colors.cardBorder}`, paddingTop: '2rem' }}>
+              <h3 style={{ fontSize: '1.5rem', color: colors.purple, fontWeight: 'bold', marginBottom: '1rem' }}>High-Demand Services</h3>
+              <ul style={{ paddingLeft: '1.5rem' }}>
                 {[
                   "AI-Powered SaaS Platforms (Python + FastAPI + Next.js)",
                   "Custom Automation Tools (APIs, Web Scraping, AI Agents)",
@@ -258,104 +240,106 @@ const App = () => {
                   "AI-Powered Marketing Campaigns (Chatbots, Content Generation)",
                   "E-Commerce Growth Systems (Shopify/WordPress + AI SEO)"
                 ].map((service, i) => (
-                  <li key={i} className="flex items-start">
-                    <span className="text-pink-500 mr-3 mt-1">•</span>
-                    {service}
+                  <li key={i} style={{ marginBottom: '0.5rem', color: colors.textSecondary }}>
+                    <span style={{ color: colors.pink }}>•</span> {service}
                   </li>
                 ))}
               </ul>
             </div>
-          </motion.div>
+          </GlassCard>
         )}
 
         {activeSection === "case-studies" && (
-          <motion.div
-            initial={{ opacity: 0, y: 50 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
-            className={`
-              backdrop-blur-xl rounded-2xl p-6 md:p-8 shadow-2xl
-              ${darkMode ? 'bg-white/5 border border-white/10' : 'bg-white/80 border border-gray-200'}
-            `}
-          >
-            <h2 className="text-3xl md:text-4xl font-bold mb-8 bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+          <GlassCard>
+            <h2 style={{
+              fontSize: '2rem',
+              background: colors.gradient2,
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              fontWeight: 'bold',
+              marginBottom: '2rem'
+            }}>
               Case Studies
             </h2>
-            <div className="space-y-6">
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
               {caseStudies.map((study, index) => (
-                <motion.div
-                  key={index}
-                  className={`p-6 rounded-xl ${darkMode ? 'bg-white/5 border border-white/10' : 'bg-gray-100 border border-gray-200'}`}
-                  whileHover={{ scale: 1.02, boxShadow: "0 0 30px rgba(147, 51, 234, 0.3)" }}
-                  transition={{ type: "spring", stiffness: 300 }}
-                >
-                  <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-4">
-                    <h3 className="text-xl md:text-2xl font-bold text-purple-500">{study.title}</h3>
-                    <span className="text-sm text-gray-500 dark:text-gray-400 mt-2 md:mt-0">{study.period}</span>
+                <div key={index} style={{
+                  padding: '1.5rem',
+                  borderRadius: '16px',
+                  background: colors.cardBg,
+                  border: `1px solid ${colors.cardBorder}`
+                }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', marginBottom: '1rem' }}>
+                    <h3 style={{ fontSize: '1.25rem', color: colors.purple, fontWeight: 'bold' }}>{study.title}</h3>
+                    <span style={{ fontSize: '0.875rem', color: colors.textSecondary }}>{study.period}</span>
                   </div>
-                  <div className="mb-3"><span className="font-medium text-blue-500">Role: </span>{study.role}</div>
-                  <div className="mb-3"><span className="font-medium text-blue-500">Technologies: </span>{study.tech}</div>
-                  <div><span className="font-medium text-blue-500">Result: </span>{study.result}</div>
-                </motion.div>
+                  <div style={{ marginBottom: '0.5rem' }}><span style={{ fontWeight: 'bold', color: colors.blue }}>Role: </span>{study.role}</div>
+                  <div style={{ marginBottom: '0.5rem' }}><span style={{ fontWeight: 'bold', color: colors.blue }}>Technologies: </span>{study.tech}</div>
+                  <div><span style={{ fontWeight: 'bold', color: colors.blue }}>Result: </span>{study.result}</div>
+                </div>
               ))}
             </div>
-          </motion.div>
+          </GlassCard>
         )}
 
         {activeSection === "contact" && (
-          <motion.div
-            initial={{ opacity: 0, y: 50 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.3 }}
-            className={`
-              backdrop-blur-xl rounded-2xl p-6 md:p-8 shadow-2xl
-              ${darkMode ? 'bg-white/5 border border-white/10' : 'bg-white/80 border border-gray-200'}
-            `}
-          >
-            <h2 className="text-3xl md:text-4xl font-bold mb-8 bg-gradient-to-r from-pink-400 to-blue-400 bg-clip-text text-transparent">
+          <GlassCard>
+            <h2 style={{
+              fontSize: '2rem',
+              background: colors.gradient3,
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              fontWeight: 'bold',
+              marginBottom: '2rem'
+            }}>
               Get In Touch
             </h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.5rem' }}>
               {[
-                { title: "Email", value: contactInfo.email, color: "purple" },
-                { title: "LinkedIn", value: contactInfo.linkedin, color: "blue" },
-                { title: "GitHub", value: contactInfo.github, color: "pink" }
+                { title: "Email", value: contactInfo.email, color: colors.purple },
+                { title: "LinkedIn", value: contactInfo.linkedin, color: colors.blue },
+                { title: "GitHub", value: contactInfo.github, color: colors.pink }
               ].map((item, i) => (
-                <motion.div
-                  key={i}
-                  className={`p-6 rounded-xl ${darkMode ? 'bg-white/5 border border-white/10' : 'bg-gray-100 border border-gray-200'}`}
-                  whileHover={{ scale: 1.05, boxShadow: `0 0 30px rgba(${item.color === 'purple' ? '120, 75, 255' : item.color === 'blue' ? '0, 123, 255' : '255, 105, 180'}, 0.3)` }}
-                  transition={{ type: "spring", stiffness: 300 }}
-                >
-                  <h3 className={`text-xl font-semibold mb-4 text-${item.color}-500`}>{item.title}</h3>
-                  <p className="text-gray-700 dark:text-gray-300 break-all mb-4">{item.value}</p>
-                  <button className={`w-full px-4 py-2 bg-gradient-to-r from-${item.color}-500 to-${item.color === 'purple' ? 'pink' : item.color === 'blue' ? 'purple' : 'blue'}-500 text-white rounded-lg hover:shadow-lg transition-all duration-300`}>
+                <div key={i} style={{
+                  padding: '1.5rem',
+                  borderRadius: '16px',
+                  background: colors.cardBg,
+                  border: `1px solid ${colors.cardBorder}`
+                }}>
+                  <h3 style={{ fontSize: '1.25rem', color: item.color, fontWeight: 'bold', marginBottom: '1rem' }}>{item.title}</h3>
+                  <p style={{ marginBottom: '1rem', wordBreak: 'break-all' }}>{item.value}</p>
+                  <button style={{
+                    width: '100%',
+                    padding: '0.75rem',
+                    borderRadius: '8px',
+                    background: item.color,
+                    color: 'white',
+                    border: 'none',
+                    fontWeight: 'bold',
+                    cursor: 'pointer'
+                  }}>
                     {item.title === "Email" ? "Copy Email" : `View ${item.title}`}
                   </button>
-                </motion.div>
+                </div>
               ))}
             </div>
-            <div className={`mt-12 pt-8 border-t ${darkMode ? 'border-white/10' : 'border-gray-200'}`}>
-              <p className="text-lg text-center">
-                Open to global remote opportunities in AI, SaaS, and digital transformation.
-              </p>
-              <p className="text-gray-500 dark:text-gray-400 text-center mt-2">
-                Let's build something amazing together.
-              </p>
+            <div style={{ borderTop: `1px solid ${colors.cardBorder}`, paddingTop: '2rem', textAlign: 'center', marginTop: '2rem' }}>
+              <p>Open to global remote opportunities in AI, SaaS, and digital transformation.</p>
+              <p style={{ marginTop: '0.5rem', opacity: 0.7 }}>Let's build something amazing together.</p>
             </div>
-          </motion.div>
+          </GlassCard>
         )}
       </main>
 
-      <footer className={`py-6 text-center text-gray-500 dark:text-gray-400 border-t ${darkMode ? 'border-white/10' : 'border-gray-200'} backdrop-blur-md`}>
+      <footer style={{
+        textAlign: 'center',
+        padding: '1.5rem',
+        borderTop: `1px solid ${colors.cardBorder}`,
+        backdropFilter: 'blur(10px)',
+        background: darkMode ? 'rgba(255, 255, 255, 0.05)' : 'rgba(255, 255, 255, 0.8)'
+      }}>
         <p>© 2024 Khizer Niaz. All rights reserved.</p>
       </footer>
-
-      <style jsx>{`
-        .hover\\:shadow-neon:hover {
-          box-shadow: 0 0 30px rgba(147, 51, 234, 0.3), 0 0 60px rgba(147, 51, 234, 0.2);
-        }
-      `}</style>
     </div>
   );
 };
