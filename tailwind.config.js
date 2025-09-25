@@ -1,14 +1,19 @@
-/** @type {import('tailwindcss').Config} */
-export default {
+// tailwind.config.js
+module.exports = {
   content: [
     "./index.html",
     "./src/**/*.{js,jsx,ts,tsx}",
-    "./public/index.html"  // Added for safety
   ],
   theme: {
     extend: {
-      animation: {
-        'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+      colors: {
+        'glass': {
+          DEFAULT: 'rgba(255, 255, 255, 0.05)',
+          light: 'rgba(255, 255, 255, 0.8)',
+        }
+      },
+      backdropBlur: {
+        'xl': '12px',
       }
     },
   },

@@ -1,11 +1,9 @@
 import React, { useState, useEffect } from "react";
-import { motion } from "framer-motion";
 
 const App = () => {
   const [darkMode, setDarkMode] = useState(true);
   const [activeSection, setActiveSection] = useState("about");
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     const handleMouseMove = (e) => {
@@ -15,20 +13,32 @@ const App = () => {
     return () => window.removeEventListener("mousemove", handleMouseMove);
   }, []);
 
-  // Predefined color palette
-  const colors = {
-    bg: darkMode ? '#0f0c29' : '#f8fafc',
-    cardBg: darkMode ? 'rgba(255, 255, 255, 0.05)' : 'rgba(255, 255, 255, 0.8)',
-    cardBorder: darkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)',
-    text: darkMode ? '#ffffff' : '#1e293b',
-    textSecondary: darkMode ? '#94a3b8' : '#64748b',
-    gradient1: 'linear-gradient(135deg, #8b5cf6, #ec4899, #3b82f6)',
-    gradient2: 'linear-gradient(135deg, #3b82f6, #8b5cf6)',
-    gradient3: 'linear-gradient(135deg, #ec4899, #3b82f6)',
-    purple: '#8b5cf6',
-    pink: '#ec4899',
-    blue: '#3b82f6'
-  };
+  // Theme colors
+  const theme = darkMode
+    ? {
+        bg: '#0f0c29',
+        cardBg: 'rgba(255, 255, 255, 0.05)',
+        cardBorder: 'rgba(255, 255, 255, 0.1)',
+        text: '#ffffff',
+        textSecondary: '#94a3b8',
+        purple: '#8b5cf6',
+        pink: '#ec4899',
+        blue: '#3b82f6',
+        navBg: 'rgba(255, 255, 255, 0.05)',
+        footerBg: 'rgba(255, 255, 255, 0.05)'
+      }
+    : {
+        bg: '#f8fafc',
+        cardBg: 'rgba(255, 255, 255, 0.8)',
+        cardBorder: 'rgba(0, 0, 0, 0.1)',
+        text: '#1e293b',
+        textSecondary: '#64748b',
+        purple: '#8b5cf6',
+        pink: '#ec4899',
+        blue: '#3b82f6',
+        navBg: 'rgba(255, 255, 255, 0.8)',
+        footerBg: 'rgba(255, 255, 255, 0.8)'
+      };
 
   const caseStudies = [
     {
@@ -73,32 +83,31 @@ const App = () => {
     github: "github.com/Khizar823"
   };
 
-  // Card component with inline styles
+  // Card component
   const GlassCard = ({ children, style = {} }) => (
-    <motion.div
-      className="rounded-2xl p-6 md:p-8 backdrop-blur-xl"
+    <div
       style={{
-        background: colors.cardBg,
-        border: `1px solid ${colors.cardBorder}`,
+        background: theme.cardBg,
+        border: `1px solid ${theme.cardBorder}`,
+        backdropFilter: 'blur(12px)',
+        WebkitBackdropFilter: 'blur(12px)',
+        borderRadius: '16px',
+        padding: '1.5rem',
         boxShadow: '0 10px 30px rgba(0, 0, 0, 0.1)',
         ...style
       }}
-      whileHover={{ 
-        scale: 1.02,
-        boxShadow: '0 20px 40px rgba(139, 92, 246, 0.3)'
-      }}
-      transition={{ type: "spring", stiffness: 300 }}
     >
       {children}
-    </motion.div>
+    </div>
   );
 
   return (
     <div style={{
-      background: colors.bg,
-      color: colors.text,
+      background: theme.bg,
+      color: theme.text,
       minHeight: '100vh',
-      transition: 'background 0.5s ease',
+      transition: 'background 0.3s ease',
+      fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, sans-serif',
       position: 'relative',
       overflow: 'hidden'
     }}>
@@ -109,11 +118,12 @@ const App = () => {
         left: 0,
         width: '100%',
         height: '100%',
-        background: `
-          radial-gradient(circle at ${mousePosition.x}px ${mousePosition.y}px, rgba(139, 92, 246, 0.2) 0%, transparent 50%),
-          radial-gradient(circle at ${window.innerWidth - mousePosition.x}px ${mousePosition.y}px, rgba(236, 72, 153, 0.2) 0%, transparent 50%),
-          ${darkMode ? 'linear-gradient(135deg, #0f0c29, #302b63)' : 'linear-gradient(135deg, #f8fafc, #e2e8f0)'}
-        `,
+        background: darkMode
+          ? `radial-gradient(circle at ${mousePosition.x}px ${mousePosition.y}px, rgba(139, 92, 246, 0.2) 0%, transparent 50%),
+             radial-gradient(circle at ${window.innerWidth - mousePosition.x}px ${mousePosition.y}px, rgba(236, 72, 153, 0.2) 0%, transparent 50%),
+             linear-gradient(135deg, #0f0c29, #302b63)`
+          : `radial-gradient(circle at ${mousePosition.x}px ${mousePosition.y}px, rgba(139, 92, 246, 0.1) 0%, transparent 50%),
+             linear-gradient(135deg, #f8fafc, #e2e8f0)`,
         zIndex: -1
       }} />
       
@@ -129,8 +139,11 @@ const App = () => {
           background: 'rgba(255, 255, 255, 0.1)',
           border: '1px solid rgba(255, 255, 255, 0.2)',
           backdropFilter: 'blur(10px)',
+          WebkitBackdropFilter: 'blur(10px)',
           cursor: 'pointer',
-          zIndex: 50
+          zIndex: 50,
+          color: 'white',
+          fontSize: '1.2rem'
         }}
       >
         {darkMode ? '☀️' : '🌙'}
@@ -144,39 +157,56 @@ const App = () => {
         right: 0,
         padding: '1rem',
         backdropFilter: 'blur(10px)',
-        background: darkMode ? 'rgba(255, 255, 255, 0.05)' : 'rgba(255, 255, 255, 0.8)',
-        borderBottom: `1px solid ${colors.cardBorder}`,
-        zIndex: 40
+        WebkitBackdropFilter: 'blur(10px)',
+        background: theme.navBg,
+        borderBottom: `1px solid ${theme.cardBorder}`,
+        zIndex: 40,
+        display: 'flex',
+        justifyContent: 'center',
+        flexWrap: 'wrap',
+        gap: '0.5rem'
       }}>
-        <div style={{ display: 'flex', justifyContent: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
-          {['about', 'skills', 'case-studies', 'contact'].map((section) => (
-            <button
-              key={section}
-              onClick={() => setActiveSection(section)}
-              style={{
-                padding: '0.5rem 1rem',
-                borderRadius: '9999px',
-                background: activeSection === section ? colors.gradient1 : 'transparent',
-                color: activeSection === section ? 'white' : colors.textSecondary,
-                border: activeSection === section ? 'none' : `1px solid ${colors.cardBorder}`,
-                fontWeight: '500',
-                cursor: 'pointer'
-              }}
-            >
-              {section === 'case-studies' ? 'Case Studies' : section.charAt(0).toUpperCase() + section.slice(1)}
-            </button>
-          ))}
-        </div>
+        {['about', 'skills', 'case-studies', 'contact'].map((section) => (
+          <button
+            key={section}
+            onClick={() => setActiveSection(section)}
+            style={{
+              padding: '0.5rem 1rem',
+              borderRadius: '9999px',
+              background: activeSection === section 
+                ? `linear-gradient(135deg, ${theme.purple}, ${theme.pink})`
+                : 'transparent',
+              color: activeSection === section ? 'white' : theme.textSecondary,
+              border: activeSection === section 
+                ? 'none' 
+                : `1px solid ${theme.cardBorder}`,
+              fontWeight: '500',
+              cursor: 'pointer',
+              fontSize: '0.875rem'
+            }}
+          >
+            {section === 'case-studies' ? 'Case Studies' : section.charAt(0).toUpperCase() + section.slice(1)}
+          </button>
+        ))}
       </nav>
 
       {/* Main Content */}
-      <main style={{ paddingTop: '6rem', paddingBottom: '4rem', padding: '0 1rem', maxWidth: '1200px', margin: '0 auto', position: 'relative', zIndex: 10 }}>
+      <main style={{
+        paddingTop: '6rem',
+        paddingBottom: '4rem',
+        paddingLeft: '1rem',
+        paddingRight: '1rem',
+        maxWidth: '1200px',
+        margin: '0 auto',
+        position: 'relative',
+        zIndex: 10
+      }}>
         {activeSection === "about" && (
           <GlassCard>
             <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
               <h1 style={{
-                fontSize: '2.5rem',
-                background: colors.gradient1,
+                fontSize: window.innerWidth >= 768 ? '3rem' : '2rem',
+                background: `linear-gradient(135deg, ${theme.purple}, ${theme.pink}, ${theme.blue})`,
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
                 fontWeight: 'bold',
@@ -184,19 +214,27 @@ const App = () => {
               }}>
                 Khizer Niaz
               </h1>
-              <p style={{ fontSize: '1.25rem', opacity: 0.9 }}>
+              <p style={{ 
+                fontSize: window.innerWidth >= 768 ? '1.25rem' : '1rem', 
+                opacity: 0.9,
+                marginBottom: '0.5rem'
+              }}>
                 Senior Software Developer | AI & SaaS Engineer | Digital Growth & SEO Specialist
               </p>
-              <p style={{ marginTop: '0.5rem', opacity: 0.7 }}>
+              <p style={{ opacity: 0.7 }}>
                 Bridging Technology & Marketing for Scalable Impact
               </p>
             </div>
-            <div style={{ borderTop: `1px solid ${colors.cardBorder}`, paddingTop: '2rem' }}>
-              <p style={{ marginBottom: '1rem', lineHeight: 1.6 }}>
+            <div style={{ 
+              borderTop: `1px solid ${theme.cardBorder}`, 
+              paddingTop: '2rem',
+              lineHeight: 1.6
+            }}>
+              <p style={{ marginBottom: '1rem' }}>
                 I'm Khizer Niaz, a Senior Software Developer & Digital Marketing Specialist with expertise in Python, FastAPI, Flask, React.js, Next.js, and AI/ML integrations. 
                 I design scalable backends, intelligent APIs, and modern frontends, while also leading digital marketing, SEO, and growth strategies.
               </p>
-              <p style={{ lineHeight: 1.6 }}>
+              <p>
                 Passionate about AI-driven solutions, SaaS innovation, and storytelling, I help businesses transform complex ideas into clean, functional, and impactful solutions. 
                 Open to global remote opportunities in AI, SaaS, and digital transformation.
               </p>
@@ -207,8 +245,8 @@ const App = () => {
         {activeSection === "skills" && (
           <GlassCard>
             <h2 style={{
-              fontSize: '2rem',
-              background: colors.gradient1,
+              fontSize: window.innerWidth >= 768 ? '2rem' : '1.5rem',
+              background: `linear-gradient(135deg, ${theme.purple}, ${theme.pink})`,
               WebkitBackgroundClip: 'text',
               WebkitTextFillColor: 'transparent',
               fontWeight: 'bold',
@@ -216,21 +254,35 @@ const App = () => {
             }}>
               Technical Skills & Expertise
             </h2>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(120px, 1fr))', gap: '1rem', marginBottom: '3rem' }}>
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: window.innerWidth >= 1024 ? 'repeat(4, 1fr)' : window.innerWidth >= 768 ? 'repeat(3, 1fr)' : 'repeat(2, 1fr)',
+              gap: '1rem',
+              marginBottom: '3rem'
+            }}>
               {skills.map((skill, index) => (
                 <div key={index} style={{
                   padding: '1rem',
                   borderRadius: '12px',
-                  background: colors.cardBg,
-                  border: `1px solid ${colors.cardBorder}`,
-                  textAlign: 'center'
+                  background: theme.cardBg,
+                  border: `1px solid ${theme.cardBorder}`,
+                  textAlign: 'center',
+                  fontSize: '0.875rem'
                 }}>
                   {skill}
                 </div>
               ))}
             </div>
-            <div style={{ borderTop: `1px solid ${colors.cardBorder}`, paddingTop: '2rem' }}>
-              <h3 style={{ fontSize: '1.5rem', color: colors.purple, fontWeight: 'bold', marginBottom: '1rem' }}>High-Demand Services</h3>
+            <div style={{ 
+              borderTop: `1px solid ${theme.cardBorder}`, 
+              paddingTop: '2rem'
+            }}>
+              <h3 style={{ 
+                fontSize: '1.25rem', 
+                color: theme.purple, 
+                fontWeight: 'bold', 
+                marginBottom: '1rem'
+              }}>High-Demand Services</h3>
               <ul style={{ paddingLeft: '1.5rem' }}>
                 {[
                   "AI-Powered SaaS Platforms (Python + FastAPI + Next.js)",
@@ -240,8 +292,12 @@ const App = () => {
                   "AI-Powered Marketing Campaigns (Chatbots, Content Generation)",
                   "E-Commerce Growth Systems (Shopify/WordPress + AI SEO)"
                 ].map((service, i) => (
-                  <li key={i} style={{ marginBottom: '0.5rem', color: colors.textSecondary }}>
-                    <span style={{ color: colors.pink }}>•</span> {service}
+                  <li key={i} style={{ 
+                    marginBottom: '0.5rem', 
+                    color: theme.textSecondary,
+                    fontSize: '0.875rem'
+                  }}>
+                    <span style={{ color: theme.pink }}>•</span> {service}
                   </li>
                 ))}
               </ul>
@@ -252,8 +308,8 @@ const App = () => {
         {activeSection === "case-studies" && (
           <GlassCard>
             <h2 style={{
-              fontSize: '2rem',
-              background: colors.gradient2,
+              fontSize: window.innerWidth >= 768 ? '2rem' : '1.5rem',
+              background: `linear-gradient(135deg, ${theme.blue}, ${theme.purple})`,
               WebkitBackgroundClip: 'text',
               WebkitTextFillColor: 'transparent',
               fontWeight: 'bold',
@@ -266,16 +322,26 @@ const App = () => {
                 <div key={index} style={{
                   padding: '1.5rem',
                   borderRadius: '16px',
-                  background: colors.cardBg,
-                  border: `1px solid ${colors.cardBorder}`
+                  background: theme.cardBg,
+                  border: `1px solid ${theme.cardBorder}`
                 }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', marginBottom: '1rem' }}>
-                    <h3 style={{ fontSize: '1.25rem', color: colors.purple, fontWeight: 'bold' }}>{study.title}</h3>
-                    <span style={{ fontSize: '0.875rem', color: colors.textSecondary }}>{study.period}</span>
+                  <div style={{ 
+                    display: 'flex', 
+                    justifyContent: 'space-between', 
+                    flexWrap: 'wrap', 
+                    marginBottom: '1rem',
+                    fontSize: '0.875rem'
+                  }}>
+                    <h3 style={{ 
+                      color: theme.purple, 
+                      fontWeight: 'bold',
+                      fontSize: window.innerWidth >= 768 ? '1.125rem' : '1rem'
+                    }}>{study.title}</h3>
+                    <span style={{ color: theme.textSecondary }}>{study.period}</span>
                   </div>
-                  <div style={{ marginBottom: '0.5rem' }}><span style={{ fontWeight: 'bold', color: colors.blue }}>Role: </span>{study.role}</div>
-                  <div style={{ marginBottom: '0.5rem' }}><span style={{ fontWeight: 'bold', color: colors.blue }}>Technologies: </span>{study.tech}</div>
-                  <div><span style={{ fontWeight: 'bold', color: colors.blue }}>Result: </span>{study.result}</div>
+                  <div style={{ marginBottom: '0.5rem', fontSize: '0.875rem' }}><span style={{ fontWeight: 'bold', color: theme.blue }}>Role: </span>{study.role}</div>
+                  <div style={{ marginBottom: '0.5rem', fontSize: '0.875rem' }}><span style={{ fontWeight: 'bold', color: theme.blue }}>Technologies: </span>{study.tech}</div>
+                  <div style={{ fontSize: '0.875rem' }}><span style={{ fontWeight: 'bold', color: theme.blue }}>Result: </span>{study.result}</div>
                 </div>
               ))}
             </div>
@@ -285,8 +351,8 @@ const App = () => {
         {activeSection === "contact" && (
           <GlassCard>
             <h2 style={{
-              fontSize: '2rem',
-              background: colors.gradient3,
+              fontSize: window.innerWidth >= 768 ? '2rem' : '1.5rem',
+              background: `linear-gradient(135deg, ${theme.pink}, ${theme.blue})`,
               WebkitBackgroundClip: 'text',
               WebkitTextFillColor: 'transparent',
               fontWeight: 'bold',
@@ -294,20 +360,33 @@ const App = () => {
             }}>
               Get In Touch
             </h2>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.5rem' }}>
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: window.innerWidth >= 768 ? 'repeat(3, 1fr)' : '1fr',
+              gap: '1.5rem'
+            }}>
               {[
-                { title: "Email", value: contactInfo.email, color: colors.purple },
-                { title: "LinkedIn", value: contactInfo.linkedin, color: colors.blue },
-                { title: "GitHub", value: contactInfo.github, color: colors.pink }
+                { title: "Email", value: contactInfo.email, color: theme.purple },
+                { title: "LinkedIn", value: contactInfo.linkedin, color: theme.blue },
+                { title: "GitHub", value: contactInfo.github, color: theme.pink }
               ].map((item, i) => (
                 <div key={i} style={{
                   padding: '1.5rem',
                   borderRadius: '16px',
-                  background: colors.cardBg,
-                  border: `1px solid ${colors.cardBorder}`
+                  background: theme.cardBg,
+                  border: `1px solid ${theme.cardBorder}`
                 }}>
-                  <h3 style={{ fontSize: '1.25rem', color: item.color, fontWeight: 'bold', marginBottom: '1rem' }}>{item.title}</h3>
-                  <p style={{ marginBottom: '1rem', wordBreak: 'break-all' }}>{item.value}</p>
+                  <h3 style={{ 
+                    fontSize: '1.125rem', 
+                    color: item.color, 
+                    fontWeight: 'bold', 
+                    marginBottom: '1rem'
+                  }}>{item.title}</h3>
+                  <p style={{ 
+                    marginBottom: '1rem', 
+                    wordBreak: 'break-all',
+                    fontSize: '0.875rem'
+                  }}>{item.value}</p>
                   <button style={{
                     width: '100%',
                     padding: '0.75rem',
@@ -316,14 +395,21 @@ const App = () => {
                     color: 'white',
                     border: 'none',
                     fontWeight: 'bold',
-                    cursor: 'pointer'
+                    cursor: 'pointer',
+                    fontSize: '0.875rem'
                   }}>
                     {item.title === "Email" ? "Copy Email" : `View ${item.title}`}
                   </button>
                 </div>
               ))}
             </div>
-            <div style={{ borderTop: `1px solid ${colors.cardBorder}`, paddingTop: '2rem', textAlign: 'center', marginTop: '2rem' }}>
+            <div style={{ 
+              borderTop: `1px solid ${theme.cardBorder}`, 
+              paddingTop: '2rem', 
+              textAlign: 'center', 
+              marginTop: '2rem',
+              fontSize: '0.875rem'
+            }}>
               <p>Open to global remote opportunities in AI, SaaS, and digital transformation.</p>
               <p style={{ marginTop: '0.5rem', opacity: 0.7 }}>Let's build something amazing together.</p>
             </div>
@@ -334,9 +420,11 @@ const App = () => {
       <footer style={{
         textAlign: 'center',
         padding: '1.5rem',
-        borderTop: `1px solid ${colors.cardBorder}`,
+        borderTop: `1px solid ${theme.cardBorder}`,
         backdropFilter: 'blur(10px)',
-        background: darkMode ? 'rgba(255, 255, 255, 0.05)' : 'rgba(255, 255, 255, 0.8)'
+        WebkitBackdropFilter: 'blur(10px)',
+        background: theme.footerBg,
+        fontSize: '0.875rem'
       }}>
         <p>© 2024 Khizer Niaz. All rights reserved.</p>
       </footer>
